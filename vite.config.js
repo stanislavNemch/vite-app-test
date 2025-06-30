@@ -1,34 +1,40 @@
 import { defineConfig } from 'vite';
-// ИМПОРТИРУЕМ 'basename'
 import { resolve, basename } from 'path';
 import { glob } from 'glob';
 
-// Ваши плагины
 import injectHTML from 'vite-plugin-html-inject';
 import FullReload from 'vite-plugin-full-reload';
 import SortCss from 'postcss-sort-media-queries';
 import purgecss from '@fullhuman/postcss-purgecss';
 import viteCompression from 'vite-plugin-compression';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 export default defineConfig(({ command }) => {
   const isBuild = command === 'build';
 
-  // ИСПРАВЛЕННЫЙ БЛОК
   const htmlEntries = Object.fromEntries(
-    glob.sync('src/**/*.html').map(file => [
-      // Используем basename для корректного получения имени файла
-      basename(file, '.html'),
-      resolve(__dirname, file),
-    ])
+    glob
+      .sync('src/**/*.html')
+      .map(file => [basename(file, '.html'), resolve(__dirname, file)])
   );
 
   return {
     root: resolve(__dirname, 'src'),
     base: './',
 
+    // Плагины Vite
     plugins: [
       injectHTML(),
       !isBuild && FullReload(['src/partials/**/*.html']),
+      isBuild &&
+        viteStaticCopy({
+          targets: [
+            {
+              src: 'img/icon/*',
+              dest: 'img/icon',
+            },
+          ],
+        }),
       isBuild &&
         viteCompression({
           verbose: true,
@@ -41,21 +47,28 @@ export default defineConfig(({ command }) => {
           algorithm: 'gzip',
           ext: '.gz',
         }),
-    ],
+    ].filter(Boolean),
 
     css: {
       postcss: {
         plugins: [
           SortCss(),
-          isBuild &&
-            purgecss.default({
-              content: ['./src/**/*.html', './src/js/**/*.js'],
-              safelist: {
-                standard: ['is-active', 'is-visible'],
-                deep: [/swiper/, /modal/],
-              },
-            }),
-        ],
+          // Используем PurgeCSS для удаления неиспользуемых CSS
+          // isBuild &&
+          //   purgecss.default({
+          //     content: ['./src/**/*.html', './src/js/**/*.js'],
+          //     safelist: {
+          //       standard: [
+          //         'is-active',
+          //         'is-visible',
+          //         'chart-legend-item',
+          //         'disabled',
+          //         'chart-legend-item.disabled',
+          //       ],
+          //       deep: [/swiper/, /modal/],
+          //     },
+          //   }),
+        ].filter(Boolean),
       },
     },
 

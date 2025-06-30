@@ -20,11 +20,13 @@
     "vite": "^7.0.0",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-full-reload": "^1.2.0",
-    "vite-plugin-html-inject": "^1.1.2"
+    "vite-plugin-html-inject": "^1.1.2",
+    "vite-plugin-static-copy": "^3.1.0"
   },
   "author": "Stanislav Nemchenko <stas.buka@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "gh-pages": "^6.3.0",
     "chart.js": "^4.5.0",
     "izitoast": "^1.4.0",
     "lodash": "^4.17.21"
